@@ -1,0 +1,69 @@
+name: Build Theme
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build theme package
+        run: |
+          set -e
+          THEME_ID="dev.lladlam.lfg"
+          ARTIFACT_NAME="Liquid-Flavored-Glass"
+
+          # 如果主题目录中存在 .csproj 则编译，否则按纯 XAML 主题直接打包
+          if find "$THEME_ID" -name "*.csproj" 2>/dev/null | grep -q .; then
+            echo "==> 检测到 C# 项目，开始编译..."
+            dotnet build "$THEME_ID" -c Release -o "./build-output"
+            mkdir -p "./package/$THEME_ID"
+            cp -r "./build-output/." "./package/$THEME_ID/"
+          else
+            echo "==> 纯 XAML 主题，直接打包..."
+            mkdir -p "./package"
+            cp -r "$THEME_ID" "./package/"
+          fi
+
+          # 同步 manifest 中声明的资源（banner 等）确保存在
+          echo "==> 打包目录内容："
+          ls -la "./package/$THEME_ID"
+
+          # 生成 zip：解压后应得到 dev.lladlam.lfg/ 目录
+          cd ./package
+          zip -r "../${ARTIFACT_NAME}.zip" "$THEME_ID"
+          cd ..
+
+          echo "==> zip 内容："
+          unzip -l "${ARTIFACT_NAME}.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Liquid-Flavored-Glass
+          path: Liquid-Flavored-Glass.zip
+          if-no-files-found: error
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Liquid-Flavored-Glass.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
