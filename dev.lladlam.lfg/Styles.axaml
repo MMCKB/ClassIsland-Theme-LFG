@@ -41,10 +41,42 @@
                 <GradientStop Color="#06FFFFFF" Offset="1"/>
             </LinearGradientBrush.GradientStops>
         </LinearGradientBrush>
+
+        <!-- 彩色跑马灯渐变画刷：使用 SpreadMethod=Repeat 实现无缝平铺 -->
+        <LinearGradientBrush x:Key="RainbowMarqueeBrush" StartPoint="0%,0%" EndPoint="10%,0%" SpreadMethod="Repeat">
+            <LinearGradientBrush.GradientStops>
+                <GradientStop Color="#FFFF0B0B" Offset="0.0"/>
+                <GradientStop Color="#FFFF7A00" Offset="0.16"/>
+                <GradientStop Color="#FFFFE600" Offset="0.33"/>
+                <GradientStop Color="#FF15FF00" Offset="0.50"/>
+                <GradientStop Color="#FF00C3FF" Offset="0.66"/>
+                <GradientStop Color="#FF4B0082" Offset="0.83"/>
+                <GradientStop Color="#FFFF0B0B" Offset="1.0"/>
+            </LinearGradientBrush.GradientStops>
+        </LinearGradientBrush>
     </Styles.Resources>
 
     <Style Selector="TextBlock">
         <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <!-- 跑马灯内部动画边框：通过 TranslateTransform 平移实现彩虹流光效果 -->
+    <Style Selector="Border.marquee-inner">
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform X="0"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Animations>
+            <Animation Duration="0:0:4" IterationCount="INFINITE">
+                <KeyFrame Cue="0%">
+                    <Setter Property="TranslateTransform.X" Value="0"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="TranslateTransform.X" Value="-200"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
     </Style>
 
     <Style Selector="Border.line-background">
@@ -98,6 +130,28 @@
                             Width="{Binding BackgroundWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType=controls:MainWindowLine}}"
                             ClipToBounds="True"
                             Opacity="0.7"/>
+
+                    <!-- 彩色跑马灯边缘效果：外层做圆角裁剪，内层做彩虹流光平移 -->
+                    <Border x:Name="MarqueeClipBorder"
+                            IsVisible="{Binding !$self.(ci:MainWindowStylesAssist.IsIslandSeperated)}"
+                            IsHitTestVisible="False"
+                            ClipToBounds="True"
+                            CornerRadius="{Binding $self.(ci:MainWindowStylesAssist.CornerRadius), Converter={StaticResource SizeDoubleToCornerRadiusConverter}, ConverterParameter=1.0}"
+                            Width="{Binding BackgroundWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType=controls:MainWindowLine}}"
+                            Height="{DynamicResource IslandContainerHeight}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Stretch"
+                            BoxShadow="0 0 6 0 #80FF00C3">
+                        <Border Classes="marquee-inner"
+                                Width="2000"
+                                Height="{DynamicResource IslandContainerHeight}"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Stretch"
+                                BorderThickness="2"
+                                Background="Transparent"
+                                CornerRadius="0"
+                                BorderBrush="{StaticResource RainbowMarqueeBrush}"/>
+                    </Border>
 
                     <Grid x:Name="ContentClipBorder" Classes="clip-host">
                         <Panel Classes="animated-resize" ClipToBounds="False">
@@ -208,6 +262,27 @@
                             Classes="docking line-background"
                             Width="{Binding BackgroundWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType=controls:MainWindowLine}}"
                             Height="{DynamicResource IslandContainerHeight}" />
+                    <!-- 彩色跑马灯边缘效果（精简模式） -->
+                    <Border x:Name="MarqueeClipBorder"
+                            IsVisible="{Binding !$self.(ci:MainWindowStylesAssist.IsIslandSeperated)}"
+                            IsHitTestVisible="False"
+                            ClipToBounds="True"
+                            CornerRadius="{Binding $self.(ci:MainWindowStylesAssist.CornerRadius), Converter={StaticResource SizeDoubleToCornerRadiusConverter}, ConverterParameter=1.0}"
+                            Width="{Binding BackgroundWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType=controls:MainWindowLine}}"
+                            Height="{DynamicResource IslandContainerHeight}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Stretch"
+                            BoxShadow="0 0 6 0 #80FF00C3">
+                        <Border Classes="marquee-inner"
+                                Width="2000"
+                                Height="{DynamicResource IslandContainerHeight}"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Stretch"
+                                BorderThickness="2"
+                                Background="Transparent"
+                                CornerRadius="0"
+                                BorderBrush="{StaticResource RainbowMarqueeBrush}"/>
+                    </Border>
                     <Grid x:Name="ContentClipBorder" Classes="clip-host">
                         <Panel Classes="animated-resize" ClipToBounds="False">
                             <Grid x:Name="PART_GridWrapper" ClipToBounds="False"
