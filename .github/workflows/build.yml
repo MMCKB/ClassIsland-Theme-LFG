@@ -28,28 +28,37 @@ jobs:
           THEME_ID="dev.lladlam.lfg"
           ARTIFACT_NAME="Liquid-Flavored-Glass"
 
+          # ClassIsland 安装时会在 zip 根目录查找 manifest.yml，
+          # 解压后所有文件直接进入 Themes/<id>/ 目录。
+          # 因此 zip 必须是扁平结构：根目录直接是 manifest.yml / Styles.axaml / banner.png，
+          # 不能再套一层 dev.lladlam.lfg/ 父目录。
+
+          mkdir -p "./package"
+
           # 如果主题目录中存在 .csproj 则编译，否则按纯 XAML 主题直接打包
           if find "$THEME_ID" -name "*.csproj" 2>/dev/null | grep -q .; then
             echo "==> 检测到 C# 项目，开始编译..."
             dotnet build "$THEME_ID" -c Release -o "./build-output"
-            mkdir -p "./package/$THEME_ID"
-            cp -r "./build-output/." "./package/$THEME_ID/"
+            # 将编译产物复制到扁平打包目录
+            cp -r "./build-output/." "./package/"
+            # 确保主题资源文件（manifest、banner、xaml）也在
+            cp -f "$THEME_ID/manifest.yml" "./package/" 2>/dev/null || true
+            cp -f "$THEME_ID/banner.png" "./package/" 2>/dev/null || true
           else
-            echo "==> 纯 XAML 主题，直接打包..."
-            mkdir -p "./package"
-            cp -r "$THEME_ID" "./package/"
+            echo "==> 纯 XAML 主题，直接打包主题目录内所有文件..."
+            # 关键：复制“目录内容”而非目录本身，确保 zip 内是扁平结构
+            cp -r "$THEME_ID/." "./package/"
           fi
 
-          # 同步 manifest 中声明的资源（banner 等）确保存在
-          echo "==> 打包目录内容："
-          ls -la "./package/$THEME_ID"
+          echo "==> 打包目录内容（应为扁平结构）："
+          ls -la "./package/"
 
-          # 生成 zip：解压后应得到 dev.lladlam.lfg/ 目录
+          # 生成 zip：在 package 目录内打包当前目录内容，避免外层路径
           cd ./package
-          zip -r "../${ARTIFACT_NAME}.zip" "$THEME_ID"
+          zip -r "../${ARTIFACT_NAME}.zip" .
           cd ..
 
-          echo "==> zip 内容："
+          echo "==> zip 内容（manifest.yml 应位于根目录）："
           unzip -l "${ARTIFACT_NAME}.zip"
 
       - name: Upload artifact
