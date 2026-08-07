@@ -41,52 +41,327 @@
                 <GradientStop Color="#06FFFFFF" Offset="1"/>
             </LinearGradientBrush.GradientStops>
         </LinearGradientBrush>
+
+        <!-- ===== 跑马灯彩虹色画刷 ===== -->
+        <SolidColorBrush x:Key="RL_Red" Color="#FFFF3B3B"/>
+        <SolidColorBrush x:Key="RL_Orange" Color="#FFFF9F3B"/>
+        <SolidColorBrush x:Key="RL_Yellow" Color="#FFFFF73B"/>
+        <SolidColorBrush x:Key="RL_Green" Color="#FF3BFF8C"/>
+        <SolidColorBrush x:Key="RL_Cyan" Color="#FF3BD4FF"/>
+        <SolidColorBrush x:Key="RL_Blue" Color="#FF7B3BFF"/>
+        <SolidColorBrush x:Key="RL_Purple" Color="#FFFF3BE2"/>
     </Styles.Resources>
 
     <Style Selector="TextBlock">
         <Setter Property="Foreground" Value="White"/>
     </Style>
 
-    <!-- ===== 边缘彩色跑马灯：通过 BoxShadow 关键帧动画实现整圈彩虹流光 =====
-         Avalonia 中 BoxShadow 可动画（BoxShadows 类型可插值），
-         配合 IterationCount=INFINITE 实现持续循环。
-         阴影格式：offsetX offsetY blur spread color
-         "0 0 10 2" = 四周均匀发光，10px 模糊，2px 扩展。 -->
+    <!-- ===== 基础背景样式（已移除旧的 BoxShadow 跑马灯动画） ===== -->
     <Style Selector="Border.line-background">
         <Setter Property="Background" Value="{StaticResource LiquidGlassBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource LiquidGlassBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="{Binding $self.(ci:MainWindowStylesAssist.CornerRadius), Converter={StaticResource SizeDoubleToCornerRadiusConverter}, ConverterParameter=1.0}"/>
         <Setter Property="Opacity" Value="{Binding $self.(ci:MainWindowStylesAssist.BackgroundOpacity), Mode=OneWay}"/>
-        <Setter Property="BoxShadow" Value="0 2 16 0 #30000000, 0 0 10 2 #FFFF0B0B, 0 0 1 0 #10FFFFFF inset"/>
-        <Style.Animations>
-            <Animation Duration="0:0:6" IterationCount="INFINITE" FillMode="Both">
-                <KeyFrame Cue="0%">
-                    <Setter Property="BoxShadow" Value="0 2 16 0 #30000000, 0 0 10 2 #FFFF0B0B, 0 0 1 0 #10FFFFFF inset"/>
-                </KeyFrame>
-                <KeyFrame Cue="16%">
-                    <Setter Property="BoxShadow" Value="0 2 16 0 #30000000, 0 0 10 2 #FFFF7A00, 0 0 1 0 #10FFFFFF inset"/>
-                </KeyFrame>
-                <KeyFrame Cue="33%">
-                    <Setter Property="BoxShadow" Value="0 2 16 0 #30000000, 0 0 10 2 #FFFFE600, 0 0 1 0 #10FFFFFF inset"/>
-                </KeyFrame>
-                <KeyFrame Cue="50%">
-                    <Setter Property="BoxShadow" Value="0 2 16 0 #30000000, 0 0 10 2 #FF15FF00, 0 0 1 0 #10FFFFFF inset"/>
-                </KeyFrame>
-                <KeyFrame Cue="66%">
-                    <Setter Property="BoxShadow" Value="0 2 16 0 #30000000, 0 0 10 2 #FF00C3FF, 0 0 1 0 #10FFFFFF inset"/>
-                </KeyFrame>
-                <KeyFrame Cue="83%">
-                    <Setter Property="BoxShadow" Value="0 2 16 0 #30000000, 0 0 10 2 #FF8B00FF, 0 0 1 0 #10FFFFFF inset"/>
-                </KeyFrame>
-                <KeyFrame Cue="100%">
-                    <Setter Property="BoxShadow" Value="0 2 16 0 #30000000, 0 0 10 2 #FFFF0B0B, 0 0 1 0 #10FFFFFF inset"/>
-                </KeyFrame>
-            </Animation>
-        </Style.Animations>
+        <Setter Property="BoxShadow" Value="0 2 16 0 #30000000, 0 0 1 0 #10FFFFFF inset"/>
     </Style>
     <Style Selector="controls|MainWindowLine Border[(ci|MainWindowStylesAssist.IsCustomBackgroundColorEnabled)=True].line-background">
         <Setter Property="Background" Value="{Binding $self.(ci:MainWindowStylesAssist.BackgroundColor), Converter={StaticResource ColorToColorPickerBrushConverter}}"/>
+    </Style>
+
+    <!-- ===== 跑马灯灯泡基础样式（7 个一组，跑马灯流转周期约 3.15 秒） ===== -->
+    <Style Selector="Rectangle.rl-bulb">
+        <Setter Property="Opacity" Value="0.15"/>
+        <Setter Property="RadiusX" Value="1"/>
+        <Setter Property="RadiusY" Value="1"/>
+    </Style>
+
+    <!-- 跑马灯灯泡流光动画：每个灯泡依次亮起，错开 0.45 秒 -->
+    <Style Selector="Rectangle.rl-delay-0">
+        <Style.Animations>
+            <Animation Delay="0:0:0.00" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-delay-1">
+        <Style.Animations>
+            <Animation Delay="0:0:0.45" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-delay-2">
+        <Style.Animations>
+            <Animation Delay="0:0:0.90" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-delay-3">
+        <Style.Animations>
+            <Animation Delay="0:0:1.35" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-delay-4">
+        <Style.Animations>
+            <Animation Delay="0:0:1.80" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-delay-5">
+        <Style.Animations>
+            <Animation Delay="0:0:2.25" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-delay-6">
+        <Style.Animations>
+            <Animation Delay="0:0:2.70" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!-- 右侧边灯泡：错开 0.3s 使整圈顺时针流转 -->
+    <Style Selector="Rectangle.rl-right.rl-delay-0">
+        <Style.Animations>
+            <Animation Delay="0:0:0.30" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-right.rl-delay-1">
+        <Style.Animations>
+            <Animation Delay="0:0:0.75" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-right.rl-delay-2">
+        <Style.Animations>
+            <Animation Delay="0:0:1.20" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-right.rl-delay-3">
+        <Style.Animations>
+            <Animation Delay="0:0:1.65" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-right.rl-delay-4">
+        <Style.Animations>
+            <Animation Delay="0:0:2.10" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-right.rl-delay-5">
+        <Style.Animations>
+            <Animation Delay="0:0:2.55" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-right.rl-delay-6">
+        <Style.Animations>
+            <Animation Delay="0:0:3.00" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!-- 底侧边灯泡：再错开 0.3s -->
+    <Style Selector="Rectangle.rl-bottom.rl-delay-0">
+        <Style.Animations>
+            <Animation Delay="0:0:0.60" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-bottom.rl-delay-1">
+        <Style.Animations>
+            <Animation Delay="0:0:1.05" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-bottom.rl-delay-2">
+        <Style.Animations>
+            <Animation Delay="0:0:1.50" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-bottom.rl-delay-3">
+        <Style.Animations>
+            <Animation Delay="0:0:1.95" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-bottom.rl-delay-4">
+        <Style.Animations>
+            <Animation Delay="0:0:2.40" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-bottom.rl-delay-5">
+        <Style.Animations>
+            <Animation Delay="0:0:2.85" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-bottom.rl-delay-6">
+        <Style.Animations>
+            <Animation Delay="0:0:3.30" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!-- 左侧边灯泡：再错开 0.3s -->
+    <Style Selector="Rectangle.rl-left.rl-delay-0">
+        <Style.Animations>
+            <Animation Delay="0:0:0.90" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-left.rl-delay-1">
+        <Style.Animations>
+            <Animation Delay="0:0:1.35" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-left.rl-delay-2">
+        <Style.Animations>
+            <Animation Delay="0:0:1.80" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-left.rl-delay-3">
+        <Style.Animations>
+            <Animation Delay="0:0:2.25" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-left.rl-delay-4">
+        <Style.Animations>
+            <Animation Delay="0:0:2.70" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-left.rl-delay-5">
+        <Style.Animations>
+            <Animation Delay="0:0:3.15" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Rectangle.rl-left.rl-delay-6">
+        <Style.Animations>
+            <Animation Delay="0:0:3.60" Duration="0:0:3.15" IterationCount="INFINITE">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="7%"><Setter Property="Opacity" Value="1.0"/></KeyFrame>
+                <KeyFrame Cue="14%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.15"/></KeyFrame>
+            </Animation>
+        </Style.Animations>
     </Style>
 
     <Style Selector="controls|MainWindowLine">
@@ -98,10 +373,113 @@
 
                     <Border x:Name="BackgroundBorderWrapper"
                             IsVisible="{Binding !$self.(ci:MainWindowStylesAssist.IsIslandSeperated)}">
-                        <Border x:Name="BackgroundBorder"
-                                Classes="docking line-background"
-                                Width="{Binding BackgroundWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType=controls:MainWindowLine}}"
-                                Height="{DynamicResource IslandContainerHeight}"/>
+                        <Grid>
+                            <Border x:Name="BackgroundBorder"
+                                    Classes="docking line-background"
+                                    Width="{Binding BackgroundWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType=controls:MainWindowLine}}"
+                                    Height="{DynamicResource IslandContainerHeight}"/>
+
+                            <!-- ========================================== -->
+                            <!-- 多色跑马灯：距离边缘约 1mm（4px）的彩虹流光    -->
+                            <!-- 每边 7 个彩色灯泡，按顺时针方向依次亮起        -->
+                            <!-- ========================================== -->
+                            <Grid Margin="4"
+                                  IsHitTestVisible="False"
+                                  VerticalAlignment="Stretch"
+                                  HorizontalAlignment="Stretch">
+                                <!-- 顶边：从左到右流光，水平排列 7 色 -->
+                                <Grid VerticalAlignment="Top"
+                                      HorizontalAlignment="Stretch"
+                                      Height="2"
+                                      Margin="8,0,8,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Rectangle Classes="rl-bulb rl-delay-0" Grid.Column="0" Fill="{StaticResource RL_Red}" Margin="0,0,2,0"/>
+                                    <Rectangle Classes="rl-bulb rl-delay-1" Grid.Column="1" Fill="{StaticResource RL_Orange}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-delay-2" Grid.Column="2" Fill="{StaticResource RL_Yellow}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-delay-3" Grid.Column="3" Fill="{StaticResource RL_Green}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-delay-4" Grid.Column="4" Fill="{StaticResource RL_Cyan}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-delay-5" Grid.Column="5" Fill="{StaticResource RL_Blue}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-delay-6" Grid.Column="6" Fill="{StaticResource RL_Purple}" Margin="2,0,0,0"/>
+                                </Grid>
+
+                                <!-- 右侧：从上到下流光，垂直排列 7 色 -->
+                                <Grid HorizontalAlignment="Right"
+                                      VerticalAlignment="Stretch"
+                                      Width="2"
+                                      Margin="0,8,0,8">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Rectangle Classes="rl-bulb rl-right rl-delay-0" Grid.Row="0" Fill="{StaticResource RL_Purple}" Margin="0,0,0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-right rl-delay-1" Grid.Row="1" Fill="{StaticResource RL_Red}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-right rl-delay-2" Grid.Row="2" Fill="{StaticResource RL_Orange}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-right rl-delay-3" Grid.Row="3" Fill="{StaticResource RL_Yellow}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-right rl-delay-4" Grid.Row="4" Fill="{StaticResource RL_Green}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-right rl-delay-5" Grid.Row="5" Fill="{StaticResource RL_Cyan}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-right rl-delay-6" Grid.Row="6" Fill="{StaticResource RL_Blue}" Margin="0,1,0,0"/>
+                                </Grid>
+
+                                <!-- 底边：从右到左流光，水平排列 7 色（反转） -->
+                                <Grid VerticalAlignment="Bottom"
+                                      HorizontalAlignment="Stretch"
+                                      Height="2"
+                                      Margin="8,0,8,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Rectangle Classes="rl-bulb rl-bottom rl-delay-0" Grid.Column="6" Fill="{StaticResource RL_Red}" Margin="2,0,0,0"/>
+                                    <Rectangle Classes="rl-bulb rl-bottom rl-delay-1" Grid.Column="5" Fill="{StaticResource RL_Orange}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-bottom rl-delay-2" Grid.Column="4" Fill="{StaticResource RL_Yellow}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-bottom rl-delay-3" Grid.Column="3" Fill="{StaticResource RL_Green}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-bottom rl-delay-4" Grid.Column="2" Fill="{StaticResource RL_Cyan}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-bottom rl-delay-5" Grid.Column="1" Fill="{StaticResource RL_Blue}" Margin="1,0"/>
+                                    <Rectangle Classes="rl-bulb rl-bottom rl-delay-6" Grid.Column="0" Fill="{StaticResource RL_Purple}" Margin="0,0,2,0"/>
+                                </Grid>
+
+                                <!-- 左侧：从下到上流光，垂直排列 7 色（反转） -->
+                                <Grid HorizontalAlignment="Left"
+                                      VerticalAlignment="Stretch"
+                                      Width="2"
+                                      Margin="0,8,0,8">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Rectangle Classes="rl-bulb rl-left rl-delay-0" Grid.Row="6" Fill="{StaticResource RL_Purple}" Margin="0,1,0,0"/>
+                                    <Rectangle Classes="rl-bulb rl-left rl-delay-1" Grid.Row="5" Fill="{StaticResource RL_Red}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-left rl-delay-2" Grid.Row="4" Fill="{StaticResource RL_Orange}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-left rl-delay-3" Grid.Row="3" Fill="{StaticResource RL_Yellow}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-left rl-delay-4" Grid.Row="2" Fill="{StaticResource RL_Green}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-left rl-delay-5" Grid.Row="1" Fill="{StaticResource RL_Cyan}" Margin="0,1"/>
+                                    <Rectangle Classes="rl-bulb rl-left rl-delay-6" Grid.Row="0" Fill="{StaticResource RL_Blue}" Margin="0,0,0,1"/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
                     </Border>
                     <Border x:Name="BackgroundBorderOverlayMask"
                             Classes="docking primaryColorZone"
